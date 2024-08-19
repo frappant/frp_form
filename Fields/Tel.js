@@ -1,5 +1,4 @@
 import Input from "./Input";
-import TomSelect from "tom-select";
 
 export default class Tel extends Input {
 

@@ -1,0 +1,15 @@
+{
+  "name": "frp-forms",
+  "version": "1.0.0",
+  "description": "automatic form validation",
+  "main": "Form.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dijar Bytyçi",
+  "license": "ISC",
+  "dependencies": {
+    "signature_pad": "^5.0.2",
+    "tom-select": "^2.3.1"
+  }
+}
