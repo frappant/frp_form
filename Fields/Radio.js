@@ -28,10 +28,10 @@ export default class Radio extends Checkbox {
         })
 
         if(this.$el.checked) {
-            this.$label.classList.add('focused');
+            if(this.$label)this.$label.classList.add('focused');
             this.$el.classList.add('focused');
         } else {
-            this.$label.classList.remove('focused');
+            if(this.$label)this.$label.classList.remove('focused');
             this.$el.classList.remove('focused');
         }
     }

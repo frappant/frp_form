@@ -32,6 +32,12 @@ export default class Form {
         /* pushes events into dataLayer */
         tracking: false,
 
+        /* validate initially */
+        validateOnLoad: false,
+
+        /* enable submit button when all fields are valid */
+        enableSubmitButtonOnValid: false,
+
         /* The default classes for the input types */
         type: {
             Signature: Signature,
@@ -102,13 +108,21 @@ export default class Form {
         selectElements.forEach(select => this.initializeInput(select, 'select'));
         textAreaElements.forEach(textarea => this.initializeInput(textarea, 'textarea'));
 
+        if(this.options.enableSubmitButtonOnValid) this.toggleSubmitButton();
+
         if(this.options.paging.enabled) {
             this.paging = {
                 pages: null,
                 currentStep: 0
             };
 
-            this.paging.pages = this.$el.querySelectorAll(this.options.paging.pageSelector);
+            if(this.paging.type == 'powermail') {
+              this.paging.pages = this.$el.querySelectorAll(this.options.paging.pageSelector);
+            } else {
+              // form extension makes paging automatically controlled by PHP
+              this.paging.pages = [];
+            }
+
             this.paging.pages.forEach((page, pageIndex) => {
 
                 const pageInputs = page.querySelectorAll('input, select, textarea');
@@ -155,31 +169,53 @@ export default class Form {
             })
         }
 
+        if(this.options.validateOnLoad) {
+            this.validate();
+        }
+
+        //add event form:initialized
+        this.$el.dispatchEvent(new CustomEvent('form:initialized'));
     }
+
+    /**
+     * Toggles the submit button
+     */
+    toggleSubmitButton() {
+        const submitButtons = this.$el.querySelectorAll('[type="submit"]');
+
+        const visibleInputs = Object.values(this.inputs).filter(input => input.$el.type !== "hidden");
+        const isFormValid = visibleInputs.every(input => input.$el.required ? input.valid : true);
+
+        submitButtons.forEach(button => {
+            button.disabled = !isFormValid;
+        });
+    }
+
 
     /**
      * Fires on submit
      * @param event
      */
     submitEvent(event) {
-        event.preventDefault();
+        // multistep forms with EXT:form has a button with type submit to go back to the previous page
+        if(!event.submitter.classList.contains('btn-cancel')) {
+          event.preventDefault();
 
-        this.validate();
+          this.validate();
 
-        if(!this.errors) {
+          if (!this.errors) {
             this.options.onSubmit(event);
-        } else if(this.options.onSubmitError.toString() !== Function.toString()) {
+          } else if (this.options.onSubmitError.toString() !== Function.toString()) {
             this.options.onSubmitError(event);
-        }
-        /*
-        @todo @dijar is this still need?
-        if(this.errors && this.options.paging.enabled) {
+          }
+
+          if (this.errors && this.options.paging.enabled) {
             window.scrollTo({
-                top: this.$el - this.options.paging.scrollOffset,
-                behavior: 'smooth'
+              top: this.$el - this.options.paging.scrollOffset,
+              behavior: 'smooth'
             });
+          }
         }
-        */
     }
 
     validate(inputs = null) {
@@ -267,6 +303,11 @@ export default class Form {
         }
 
         input.addEventListener('focus', () => this.$el.dispatchEvent(new Event('fields:focus')));
+        if(this.options.enableSubmitButtonOnValid) {
+            input.addEventListener('field:validated', () => {
+                this.toggleSubmitButton();
+            });
+        }
     }
 
     /**

@@ -22,13 +22,17 @@ export default class Input {
 
         this.$label = this.findClosest(this.$el, 'label');
         this.setFeedbackElement();
-        this.feedbackMessage = this.form.options.customRequired ? this.form.options.customRequired : this.$feedback.innerHTML;
+        if (this.form.options.customRequired || this.$el.dataset.customvalidity) {
+            this.feedbackMessage = this.form.options.customRequired ? this.form.options.customRequired : this.$feedback.innerHTML;
+            this.feedbackMessage = this.$el.dataset.customvalidity ? this.$el.dataset.customvalidity : this.feedbackMessage;
+        }
 
-        this.valid = false;
+        this.valid = this.$el.checkValidity();
+        this.valid = this.valid ? this.valid : !this.$el.required;
         this.value = input.value;
         this.data = input.dataset;
 
-        if(this.options.eventListeners) this.setEventListeners();
+        if (this.options.eventListeners) this.setEventListeners();
     }
 
     /**
@@ -36,21 +40,31 @@ export default class Input {
      */
     validate() {
         this.value = this.$el.value;
+        if (this.$el.required || this.value.length) {
+            this.value.length;
+            this.$el.setCustomValidity('');
+            if (!this.$el.checkValidity()) {
+                if (this.$el.dataset.customvalidity) {
+                    this.$el.setCustomValidity(this.$el.dataset.customvalidity);
+                }
+                this.$el.classList.add('is-invalid');
+                this.$el.classList.remove('is-valid');
+                if (this.$feedback && !this.$feedback.innerHTML) {
+                    this.$feedback.innerHTML = this.$el.validationMessage;
+                }
+                this.valid = false;
 
-        if(!this.$el.checkValidity() || (this.max && this.max < this.value.length)) {
-            this.$el.classList.add('is-invalid');
-            if(this.$feedback && !this.$feedback.innerHTML) {
-                this.$feedback.innerHTML = this.$el.validationMessage;
+                this.$el.dispatchEvent(new Event('field:error'));
+            } else {
+                this.$el.classList.remove('is-invalid');
+                this.$el.classList.add('is-valid');
+                this.valid = true;
+
+                this.$el.dispatchEvent(new Event('field:success'));
             }
-            this.valid = false;
-
-            this.$el.dispatchEvent(new Event('field:error'));
-        } else {
-            this.$el.classList.remove('is-invalid');
-            this.valid = true;
-
-            this.$el.dispatchEvent(new Event('field:success'));
         }
+
+        this.$el.dispatchEvent(new Event('field:validated'));
     }
 
     /**
@@ -59,7 +73,7 @@ export default class Input {
     focus(event) {
         this.$el.dispatchEvent(new Event('field:focus:before'));
 
-        if(document.activeElement === this.$el || this.$el.value.length) {
+        if (document.activeElement === this.$el || this.$el.value.length) {
             this.$label.classList.add('focused');
             this.$el.classList.add('focused');
         } else {
@@ -72,7 +86,7 @@ export default class Input {
 
     blur(event) {
         this.focus(event);
-        this.$feedback.innerHTML = this.$el.value.length ? this.form.options.customFeedback : this.feedbackMessage;
+        // this.$feedback.innerHTML = this.$el.value.length ? this.form.options.customFeedback : this.feedbackMessage;
         this.validate();
     }
 
@@ -91,10 +105,10 @@ export default class Input {
     setFeedbackElement() {
         this.$feedback = this.findClosest(this.$el, '.invalid-feedback', 0);
 
-        if(!this.$feedback) {
+        if (!this.$feedback) {
             this.$feedback = document.createElement('div');
             this.$feedback.classList.add('invalid-feedback');
-            if(this.form.options.customRequired) this.$feedback.innerHTML = this.form.options.customRequired;
+            if (this.form.options.customRequired) this.$feedback.innerHTML = this.form.options.customRequired;
             this.$el.parentNode.appendChild(this.$feedback);
         }
     }
@@ -106,12 +120,12 @@ export default class Input {
      * @param levels
      * @returns {null|any}
      */
-    findClosest(sourceElement, targetSelector,  levels = 5) {
+    findClosest(sourceElement, targetSelector, levels = 5) {
         const parentElement = sourceElement.parentElement;
         const targetElement = parentElement.querySelector(targetSelector);
 
-        if(targetElement) return targetElement;
-        if(levels >= 0) return this.findClosest(parentElement, targetSelector, levels-1);
+        if (targetElement) return targetElement;
+        if (levels >= 0) return this.findClosest(parentElement, targetSelector, levels - 1);
         return null
     }
 

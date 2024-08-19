@@ -30,10 +30,36 @@ export default class CustomSelect extends Input {
 
         const selectionMessage = this.form.$el.dataset.selection;
         this.$feedback.innerHTML = selectionMessage ?? this.$feedback.innerHTML;
+        //this.customSelect.control_input.setAttribute('disabled', true)
 
         if(this.customSelect.settings.maxItems === 1) {
             this.setCustomPlaceholder(select.dataset.placeholder);
         }
+    }
+
+    validate() {
+        this.value = this.$el.value;
+
+        if(this.$el.required || this.value.length) {
+            if (!this.$el.checkValidity() || !this.$el.value) {
+              this.$el.classList.add('is-invalid');
+              this.$el.classList.remove('is-valid');
+              if (this.$feedback && !this.$feedback.innerHTML) {
+                this.$feedback.innerHTML = this.$el.validationMessage ? this.$el.validationMessage : this.customSelect.control_input.validationMessage;
+              }
+              this.valid = false;
+
+              this.$el.dispatchEvent(new Event('field:error'));
+            } else {
+                this.$el.classList.remove('is-invalid');
+                this.$el.classList.add('is-valid');
+                this.valid = true;
+
+              this.$el.dispatchEvent(new Event('field:success'));
+            }
+        }
+
+        this.$el.dispatchEvent(new Event('field:validated'));
     }
 
     focus(event) {

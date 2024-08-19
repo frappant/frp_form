@@ -50,7 +50,7 @@ export default class fileUpload extends Input {
         let filelist = this.$el.files;
         if(!this.$el.checkValidity()) {
             this.$el.classList.add('is-invalid');
-
+            this.$el.classList.remove('is-valid');
             if(this.$feedback && !this.$feedback.innerHTML) {
                 this.$feedback.innerHTML = this.$el.validationMessage;
             }
@@ -67,5 +67,7 @@ export default class fileUpload extends Input {
 
             this.$el.dispatchEvent(new Event('field:success'));
         }
+
+        this.$el.dispatchEvent(new Event('field:validated'));
     }
 }
