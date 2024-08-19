@@ -58,6 +58,7 @@ export default class fileUpload extends Input {
             this.$el.dispatchEvent(new Event('field:error'));
         }else if (!this.checkNumUploadedFiles(filelist) || !this.checkMaxAccumulatedFileSize(filelist)) {
             this.$el.classList.add('is-invalid');
+            this.$el.classList.remove('is-valid');
             this.$feedback.innerHTML = this.$el.dataset.uploadfilesizefeedback;
             this.$el.value = "";
             this.valid = false;
