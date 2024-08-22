@@ -1,5 +1,5 @@
 {
-  "name": "@frappant/frp-forms",
+  "name": "@frappant/frp-form",
   "version": "1.0.0",
   "description": "automatic form validation",
   "main": "Form.js",
@@ -8,6 +8,9 @@
   },
   "author": "Dijar Bytyçi",
   "license": "ISC",
+  "repository": {
+    "url": "git://github.com/frappant/frp-form.git"
+  },
   "dependencies": {
     "signature_pad": "^5.0.2",
     "tom-select": "^2.3.1"
