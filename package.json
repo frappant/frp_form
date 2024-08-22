@@ -9,7 +9,7 @@
   "author": "Dijar Bytyçi",
   "license": "ISC",
   "repository": {
-    "url": "git://github.com/frappant/frp-form.git"
+    "url": "git://github.com/frappant/frp_form.git"
   },
   "dependencies": {
     "signature_pad": "^5.0.2",
