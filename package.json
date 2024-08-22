@@ -1,5 +1,5 @@
 {
-  "name": "frp-forms",
+  "name": "@frappant/frp-forms",
   "version": "1.0.0",
   "description": "automatic form validation",
   "main": "Form.js",
