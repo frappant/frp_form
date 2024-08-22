@@ -166,54 +166,50 @@ const form = new Form('#myForm', {
 
 ## Standard Elements in Detail
 
-### 1. `Checkbox.js`
-- **Description**: Handles checkbox inputs with additional functionality like focus management and validation.
-- **Features**:
-   - Adds visual feedback for the focused state of checkboxes.
-   - Custom validation logic to ensure correct checkbox state.
 
-### 2. `Radio.js`
-- **Description**: Extends `Checkbox` to manage radio buttons, including validation and focus across groups of radio buttons.
-- **Features**:
-   - Manages selection state across multiple radio buttons in a group.
-   - Ensures only one radio button can be selected within a group.
-   - Custom event listeners tailored for radio button behavior.
+### Input.js
 
-### 3. `Email.js`
-- **Description**: Manages email inputs, ensuring proper format validation.
-- **Features**:
-   - Validates email format to ensure proper input.
-   - Provides integration with the broader form validation system.
+`Input.js` is the base class for all form components, providing key functionalities such as validation, event handling, and feedback management. It simplifies the creation of form inputs by centralizing common logic.
 
-### 4. `Tel.js`
-- **Description**: Handles telephone number inputs with custom validation rules.
-- **Features**:
-   - Custom validation for various telephone number formats.
-   - Ensures compliance with input requirements for phone numbers.
+#### Key Methods and Features:
 
-### 5. `Select.js`
-- **Description**: Manages standard select dropdowns, providing custom validation and feedback handling.
-- **Features**:
-   - Custom handling of select dropdowns to enhance user experience.
-   - Validates selection state and provides appropriate feedback messages.
+- **constructor(input, form, options = {})**: Initializes the input, setting up the element reference, form reference, and merging options. It also triggers the setup of event listeners and feedback management.
 
-### 6. `CustomSelect.js`
-- **Description**: An advanced version of `Select.js`, providing enhanced dropdown functionality using the `TomSelect` library.
-- **Features**:
-   - Provides advanced customization options for dropdowns.
-   - Integrates with `TomSelect` for features like search and custom placeholders.
+- **validate()**: Validates the input using the browser’s `checkValidity()` method. It manages the display of validation feedback by adding or removing `is-invalid` and `is-valid` classes based on the result.
 
-### 7. `FileUpload.js`
-- **Description**: Handles file upload inputs, with validation for file size and number of files.
-- **Features**:
-   - Validates the number of files uploaded and their total size.
-   - Provides feedback messages specific to file upload issues.
+- **focus(event)**: Handles focus events, adding a `focused` class to the input and its label if the field is active or filled.
 
-### 8. `Signature.js`
-- **Description**: Provides a canvas-based signature input using the `SignaturePad` library.
-- **Features**:
-   - Allows users to draw signatures directly on a canvas element.
-   - Handles the conversion of drawn signatures to data URLs for form submission.
+- **blur(event)**: Triggers on blur events, updating the feedback message and validating the input.
+
+- **setEventListeners()**: Sets up the essential event listeners for focus, blur, and change events. This method ensures the input reacts appropriately to user interactions.
+
+- **setFeedbackElement()**: Finds or creates the element that will display validation messages. If a feedback element doesn’t exist, it creates one and appends it to the input’s parent node.
+
+- **findClosest(sourceElement, targetSelector, levels = 5)**: Recursively searches for the closest matching element to the source element, within a specified number of levels up the DOM tree.
+
+- **setError(message)**: Directly sets a custom error message in the feedback element.
+
+- **setup()**: A placeholder method intended to be overridden in subclasses to handle any additional setup required for custom input types.
+
+#### Example: Extending Input.js
+To create a custom input with additional validation, extend the `Input` class and override necessary methods:
+
+```javascript
+import Input from 'frp_form/Fields/Input';
+
+class CustomInput extends Input {
+    validate() {
+        super.validate(); // Retain base validation
+        if (!this.$el.value.match(/your-regex/)) {
+            this.setError('Custom validation message');
+        }
+    }
+}
+```
+This example shows how to leverage the base class while adding custom validation logic.
+
+
+
 
 ## Event Listeners
 
