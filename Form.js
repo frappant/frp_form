@@ -7,6 +7,7 @@ import Radio from "./Fields/Radio";
 import Email from "./Fields/Email";
 import Tel from "./Fields/Tel";
 import FileUpload from "./Fields/FileUpload";
+import Spinner from "./Utilities/Spinner";
 
 export default class Form {
 
@@ -16,6 +17,9 @@ export default class Form {
 
         /* callback(event) */
         onSubmitError: Function,
+
+        /* show spinner on submit */
+        onSubmitSpinner: false,
 
         /* shouldn't the form be validated by the browser */
         novalidate: true,
@@ -197,6 +201,12 @@ export default class Form {
      * @param event
      */
     submitEvent(event) {
+        // show spinner on submit
+        if(this.options.onSubmitSpinner) {
+            const $submitButton = this.$el.querySelector('[type="submit"]');
+            if($submitButton) Spinner.show($submitButton);
+        }
+
         // multistep forms with EXT:form has a button with type submit to go back to the previous page
         if(!event.submitter.classList.contains('btn-cancel')) {
           event.preventDefault();
