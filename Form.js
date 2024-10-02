@@ -201,12 +201,6 @@ export default class Form {
      * @param event
      */
     submitEvent(event) {
-        // show spinner on submit
-        if(this.options.onSubmitSpinner) {
-            const $submitButton = this.$el.querySelector('[type="submit"]');
-            if($submitButton) Spinner.show($submitButton);
-        }
-
         // multistep forms with EXT:form has a button with type submit to go back to the previous page
         if(!event.submitter.classList.contains('btn-cancel')) {
           event.preventDefault();
@@ -214,6 +208,11 @@ export default class Form {
           this.validate();
 
           if (!this.errors) {
+            // show spinner on submit
+            if(this.options.onSubmitSpinner) {
+              const $submitButton = this.$el.querySelector('[type="submit"]');
+              if($submitButton) Spinner.show($submitButton);
+            }
             this.options.onSubmit(event);
           } else if (this.options.onSubmitError.toString() !== Function.toString()) {
             this.options.onSubmitError(event);
