@@ -87,6 +87,7 @@ export default class Input {
     blur(event) {
         this.focus(event);
         this.$feedback.innerHTML = this.$el.value.length ? this.form.options.customFeedback : this.feedbackMessage;
+        this.$feedback.innerHTML = this.$feedback.innerHTML == "undefined" ? "" : this.$feedback.innerHTML;
         this.validate();
     }
 
