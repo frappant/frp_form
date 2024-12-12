@@ -8,6 +8,7 @@ import Email from "./Fields/Email";
 import Tel from "./Fields/Tel";
 import FileUpload from "./Fields/FileUpload";
 import Spinner from "./Utilities/Spinner";
+import GoogleReCaptcha from "./Captcha/GoogleReCaptcha";
 
 export default class Form {
 
@@ -70,6 +71,17 @@ export default class Form {
             scrollOffset: 0,
             /* callback(event) */
             onStepChange: Function
+        },
+
+        /* Default CAPTCHA class and options */
+        captcha: {
+            class: GoogleReCaptcha, // Default CAPTCHA class
+            options: {
+                siteKey: '',          // Google reCAPTCHA site key
+                validationURL: '',    // Server endpoint for token validation
+                version: 'v3',        // reCAPTCHA version ('v2' or 'v3')
+                invisible: false,     // For v2: use invisible reCAPTCHA
+            }
         }
     };
 
@@ -82,7 +94,7 @@ export default class Form {
     constructor(selector, options = {}) {
         const that = this;
         this.selector = selector;
-        this.options = Object.assign(this.options, options);
+        this.options = this.deepMerge(this.options, options);
 
         if(this.options.customSelect) this.options.type.Select = CustomSelect;
 
@@ -113,6 +125,12 @@ export default class Form {
         textAreaElements.forEach(textarea => this.initializeInput(textarea, 'textarea'));
 
         if(this.options.enableSubmitButtonOnValid) this.toggleSubmitButton();
+
+        // Initialize CAPTCHA if configured
+        if (this.options.captcha.class) {
+            const CaptchaClass = this.options.captcha.class;
+            this.captcha = new CaptchaClass(this.options.captcha.options, this);
+        }
 
         if(this.options.paging.enabled) {
             this.paging = {
@@ -200,14 +218,19 @@ export default class Form {
      * Fires on submit
      * @param event
      */
-    submitEvent(event) {
+    async submitEvent(event) {
         // multistep forms with EXT:form has a button with type submit to go back to the previous page
         if(!event.submitter.classList.contains('btn-cancel')) {
           event.preventDefault();
 
           this.validate();
 
-          if (!this.errors) {
+          let captchaValid = true;
+          if (this.captcha) {
+            captchaValid = await this.captcha.validate();
+          }
+
+          if (!this.errors && captchaValid) {
             // show spinner on submit
             if(this.options.onSubmitSpinner) {
               const $submitButton = this.$el.querySelector('[type="submit"]');
@@ -317,6 +340,26 @@ export default class Form {
                 this.toggleSubmitButton();
             });
         }
+    }
+
+    /**
+     * Deep merge two objects
+     * @param {Object} target - Target object
+     * @param {Object} source - Source object
+     * @returns {Object} - Merged object
+     */
+    deepMerge(target, source) {
+        const output = { ...target };
+        for (const key in source) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
+                    output[key] = this.deepMerge(target[key] || {}, source[key]);
+                } else {
+                    output[key] = source[key];
+                }
+            }
+        }
+        return output;
     }
 
     /**
