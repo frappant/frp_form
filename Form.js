@@ -106,6 +106,7 @@ export default class Form {
             return;
         }
 
+        //TODO: Move Attribute modification after captcha initialization because some captcha remove attributes (Mosparo for example)
         this.$el.setAttribute('novalidate', this.options.novalidate);
         this.$el.addEventListener('submit', event => this.submitEvent(event))
 

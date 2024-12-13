@@ -10,7 +10,7 @@ export default class MosparoCaptcha extends Captcha {
    * @param {boolean} config.loadCssResource - Whether to load Mosparo's CSS (default true)
    * @param {HTMLFormElement} form - The form element
    */
-  constructor({ apiUrl, projectKey, publicKey, loadCssResource = true }, form) {
+  constructor({ apiUrl, projectKey, publicKey, loadCssResource = true, language = '' }, form) {
     super(form);
 
     if (!apiUrl || !projectKey || !publicKey) {
@@ -22,6 +22,7 @@ export default class MosparoCaptcha extends Captcha {
     this.projectKey = projectKey;
     this.publicKey = publicKey;
     this.loadCssResource = loadCssResource;
+    this.language = language;
     this.$mosparoBox = null;
 
     this.valid = false;
@@ -73,6 +74,7 @@ export default class MosparoCaptcha extends Captcha {
         this.publicKey,
         {
           loadCssResource: this.loadCssResource,
+          language: this.language,
           onCheckForm: (valid) => {
             this.valid = valid;
             if (valid) {
