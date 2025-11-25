@@ -1,4 +1,4 @@
-import Captcha from "@frappant/frp_form/Captcha/Captcha";
+import Captcha from "./Captcha";
 
 export default class GoogleReCaptcha extends Captcha {
   /**

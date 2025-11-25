@@ -60,11 +60,11 @@ export default class Form {
             /* enable paging */
             enabled: false,
             /* page selector to select all Pages in a form */
-            pageSelector:'',
+            pageSelector: '',
             /* Button selector to go back one page (invisible on the first page) */
-            btnPrevSelector:'',
+            btnPrevSelector: '',
             /* Button selector to go to the next page (invisible when a submit button is on the page) */
-            btnNextSelector:'',
+            btnNextSelector: '',
             /* Define the Startpage on load */
             currentStep: 0,
             /* Define a negative offset to avoid header overlay when it is position:fixed */
@@ -96,19 +96,19 @@ export default class Form {
         this.selector = selector;
         this.options = this.deepMerge(this.options, options);
 
-        if(this.options.customSelect) this.options.type.Select = CustomSelect;
+        if (this.options.customSelect) this.options.type.Select = CustomSelect;
 
         this.errors = false;
 
         this.$el = document.querySelector(selector);
-        if(!this.$el) {
+        if (!this.$el) {
             console.error('FORM DOES NOT EXIST');
             return;
         }
 
         //TODO: Move Attribute modification after captcha initialization because some captcha remove attributes (Mosparo for example)
         this.$el.setAttribute('novalidate', this.options.novalidate);
-        this.$el.addEventListener('submit', event => this.submitEvent(event))
+        this.$el.addEventListener('submit', this.submitEvent)
 
         this.inputs = {};
         const inputElements = this.$el.querySelectorAll('input:not([type=hidden]):not([type=email]):not([type=tel]):not([readonly]):not([disabled])');
@@ -125,7 +125,7 @@ export default class Form {
         selectElements.forEach(select => this.initializeInput(select, 'select'));
         textAreaElements.forEach(textarea => this.initializeInput(textarea, 'textarea'));
 
-        if(this.options.enableSubmitButtonOnValid) this.toggleSubmitButton();
+        if (this.options.enableSubmitButtonOnValid) this.toggleSubmitButton();
 
         // Initialize CAPTCHA if configured
         if (this.options.captcha.class) {
@@ -133,17 +133,17 @@ export default class Form {
             this.captcha = new CaptchaClass(this.options.captcha.options, this);
         }
 
-        if(this.options.paging.enabled) {
+        if (this.options.paging.enabled) {
             this.paging = {
                 pages: null,
                 currentStep: 0
             };
 
-            if(this.paging.type == 'powermail') {
-              this.paging.pages = this.$el.querySelectorAll(this.options.paging.pageSelector);
+            if (this.paging.type == 'powermail') {
+                this.paging.pages = this.$el.querySelectorAll(this.options.paging.pageSelector);
             } else {
-              // form extension makes paging automatically controlled by PHP
-              this.paging.pages = [];
+                // form extension makes paging automatically controlled by PHP
+                this.paging.pages = [];
             }
 
             this.paging.pages.forEach((page, pageIndex) => {
@@ -152,13 +152,13 @@ export default class Form {
                 this.paging.pages[pageIndex].fields = {};
 
                 pageInputs.forEach(field => {
-                    if(field.Input) {
+                    if (field.Input) {
                         this.paging.pages[pageIndex].fields[field.id] = field.Input
                     }
                 });
 
                 // hide inactive pages
-                if(that.paging.currentStep !== pageIndex) {
+                if (that.paging.currentStep !== pageIndex) {
                     page.style.display = 'none';
                 }
 
@@ -166,23 +166,23 @@ export default class Form {
                 let nextButton = page.querySelector(that.options.paging.btnNextSelector);
 
                 //add previous button if user is not on first page
-                if(pageIndex > 0) {
+                if (pageIndex > 0) {
                     prevButton.style.display = 'inline-block';
                     //add eventlistener to this button
-                    prevButton.addEventListener('click', function() {
+                    prevButton.addEventListener('click', function () {
                         that.changeStep(pageIndex - 1);
                     })
                 }
 
                 //add next if no submit button is on current page
-                if(page.querySelectorAll("input[type='submit']").length == 0 && pageIndex < that.paging.pages.length) {
+                if (page.querySelectorAll("input[type='submit']").length == 0 && pageIndex < that.paging.pages.length) {
                     nextButton.style.display = 'inline-block';
-                    nextButton.addEventListener('click', function() {
+                    nextButton.addEventListener('click', function () {
                         that.changeStep(pageIndex + 1);
                     })
                 }
 
-                if(pageIndex == (that.paging.pages.length - 1)) {
+                if (pageIndex == (that.paging.pages.length - 1)) {
                     const submitBtn = page.querySelector('input[type="submit"]');
                     nextButton.style.display = 'inline-block';
 
@@ -192,7 +192,7 @@ export default class Form {
             })
         }
 
-        if(this.options.validateOnLoad) {
+        if (this.options.validateOnLoad) {
             this.validate();
         }
 
@@ -221,33 +221,33 @@ export default class Form {
      */
     async submitEvent(event) {
         // multistep forms with EXT:form has a button with type submit to go back to the previous page
-        if(!event.submitter.classList.contains('btn-cancel')) {
-          event.preventDefault();
+        if (!event.submitter.classList.contains('btn-cancel')) {
+            event.preventDefault();
 
-          this.validate();
+            this.validate();
 
-          let captchaValid = true;
-          if (this.captcha) {
-            captchaValid = await this.captcha.validate();
-          }
-
-          if (!this.errors && captchaValid) {
-            // show spinner on submit
-            if(this.options.onSubmitSpinner) {
-              const $submitButton = this.$el.querySelector('[type="submit"]');
-              if($submitButton) Spinner.show($submitButton);
+            let captchaValid = true;
+            if (this.captcha) {
+                captchaValid = await this.captcha.validate();
             }
-            this.options.onSubmit(event);
-          } else if (this.options.onSubmitError.toString() !== Function.toString()) {
-            this.options.onSubmitError(event);
-          }
 
-          if (this.errors && this.options.paging.enabled) {
-            window.scrollTo({
-              top: this.$el - this.options.paging.scrollOffset,
-              behavior: 'smooth'
-            });
-          }
+            if (!this.errors && captchaValid) {
+                // show spinner on submit
+                if (this.options.onSubmitSpinner) {
+                    const $submitButton = this.$el.querySelector('[type="submit"]');
+                    if ($submitButton) Spinner.show($submitButton);
+                }
+                this.options.onSubmit(event);
+            } else if (this.options.onSubmitError.toString() !== Function.toString()) {
+                this.options.onSubmitError(event);
+            }
+
+            if (this.errors && this.options.paging.enabled) {
+                window.scrollTo({
+                    top: this.$el - this.options.paging.scrollOffset,
+                    behavior: 'smooth'
+                });
+            }
         }
     }
 
@@ -258,7 +258,7 @@ export default class Form {
         for (const id in inputs) {
             const input = inputs[id];
             input.validate();
-            if(!input.valid && !this.errors) {
+            if (!input.valid && !this.errors) {
                 const box = input.$el.getBoundingClientRect();
                 this.errors = true;
                 window.scrollTo({
@@ -276,18 +276,18 @@ export default class Form {
      */
     changeStep(step) {
 
-        if(this.paging.currentStep < step) {
+        if (this.paging.currentStep < step) {
             this.validate(this.paging.pages[this.paging.currentStep].fields);
         }
 
-        if(this.paging.pages[step] && (!this.errors || this.paging.currentStep > step)) {
+        if (this.paging.pages[step] && (!this.errors || this.paging.currentStep > step)) {
             // hide current step and display prev or next step
             this.paging.pages.item(this.paging.currentStep).style.display = 'none';
             this.paging.pages.item(step).style.display = 'flex';
             this.paging.currentStep = step;
 
             // execute event if one is set
-            if(this.options.paging.onStepChange.toString() !== Function.toString()) {
+            if (this.options.paging.onStepChange.toString() !== Function.toString()) {
                 this.options.paging.onStepChange(step);
             }
 
@@ -297,12 +297,12 @@ export default class Form {
                 behavior: 'smooth'
             });
 
-            if(this.options.tracking) this.event('step-change', {step: step+1});
+            if (this.options.tracking) this.event('step-change', { step: step + 1 });
         }
     }
 
     initializeInput(input, type) {
-        if(typeof type !== "undefined" && type !== "hidden") {
+        if (typeof type !== "undefined" && type !== "hidden") {
             if (typeof input.id === "undefined" || input.id === "") {
                 console.error('INPUTS NEED AN ID');
             }
@@ -336,7 +336,7 @@ export default class Form {
         }
 
         input.addEventListener('focus', () => this.$el.dispatchEvent(new Event('fields:focus')));
-        if(this.options.enableSubmitButtonOnValid) {
+        if (this.options.enableSubmitButtonOnValid) {
             input.addEventListener('field:validated', () => {
                 this.toggleSubmitButton();
             });
