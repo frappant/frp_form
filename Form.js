@@ -108,7 +108,7 @@ export default class Form {
 
         //TODO: Move Attribute modification after captcha initialization because some captcha remove attributes (Mosparo for example)
         this.$el.setAttribute('novalidate', this.options.novalidate);
-        this.$el.addEventListener('submit', this.submitEvent)
+        this.$el.addEventListener('submit', event => this.submitEvent(event))
 
         this.inputs = {};
         const inputElements = this.$el.querySelectorAll('input:not([type=hidden]):not([type=email]):not([type=tel]):not([readonly]):not([disabled])');
@@ -139,7 +139,7 @@ export default class Form {
                 currentStep: 0
             };
 
-            if (this.paging.type == 'powermail') {
+            if (this.options.paging.type == 'powermail') {
                 this.paging.pages = this.$el.querySelectorAll(this.options.paging.pageSelector);
             } else {
                 // form extension makes paging automatically controlled by PHP
