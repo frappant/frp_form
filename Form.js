@@ -37,6 +37,12 @@ export default class Form {
         /* pushes events into dataLayer */
         tracking: false,
 
+        /* enable scrolling on validation error or step change */
+        scroll: true,
+
+        /* offset for scrolling */
+        scrollOffset: 100,
+
         /* validate initially */
         validateOnLoad: false,
 
@@ -261,10 +267,12 @@ export default class Form {
             if (!input.valid && !this.errors) {
                 const box = input.$el.getBoundingClientRect();
                 this.errors = true;
-                window.scrollTo({
-                    top: box.top - 100 - input.$label.offsetHeight - input.$feedback.offsetHeight + window.scrollY,
-                    behavior: 'smooth'
-                });
+                if (this.options.scroll) {
+                    window.scrollTo({
+                        top: box.top - this.options.scrollOffset - input.$label.offsetHeight - input.$feedback.offsetHeight + window.scrollY,
+                        behavior: 'smooth'
+                    });
+                }
             }
         }
     }
@@ -292,10 +300,12 @@ export default class Form {
             }
 
             // scroll to top of the form
-            window.scrollTo({
-                top: this.$el.offsetTop - this.options.paging.scrollOffset,
-                behavior: 'smooth'
-            });
+            if (this.options.scroll) {
+                window.scrollTo({
+                    top: this.$el.offsetTop - (this.options.paging.scrollOffset || this.options.scrollOffset),
+                    behavior: 'smooth'
+                });
+            }
 
             if (this.options.tracking) this.event('step-change', { step: step + 1 });
         }
